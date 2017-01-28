@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Security.Cryptography;
 
 public class ItemGenerator : MonoBehaviour {
 	// carPrefabを入れる
@@ -17,9 +18,23 @@ public class ItemGenerator : MonoBehaviour {
 	private float posRange = 3.4f;
 
 
+	// Unityちゃんのオジュジェクト
+	private GameObject unitychan;
+	// Unityちゃんの位置
+	private float positionZ;
+
+	// Prefabs
+	private List<GameObject> prefabList = new List<GameObject>();
+
 
 	// Use this for initialization
 	void Start () {
+
+		// Unityちゃんのオブジェクトを取得
+		this.unitychan = GameObject.Find ("unitychan");
+		// Unityちゃんの位置を取得
+		this.positionZ = unitychan.transform.position.z;
+
 		// 一定の距離ごとにアイテムを生成
 		for (int i = startPos; i < goalPos; i += 15) {
 			// どのアイテムを出すのかをランダムに設定
@@ -29,6 +44,9 @@ public class ItemGenerator : MonoBehaviour {
 				for (float j = -1; j <= 1; j += 0.4f) {
 					GameObject cone = Instantiate (conePrefab) as GameObject;
 					cone.transform.position = new Vector3 (4 * j, cone.transform.position.y, i);
+
+					// prefabListにオブジェクトを追加
+					prefabList.Add (cone);
 				}
 			} else {
 				// レーンごとにアイテムを生成
@@ -42,10 +60,15 @@ public class ItemGenerator : MonoBehaviour {
 						// コインを生成
 						GameObject coin = Instantiate (coinPrefab) as GameObject;
 						coin.transform.position = new Vector3 (posRange * j, coin.transform.position.y, i + offsetZ);
+
+
 					} else if (7 <= item && item <= 9) {
 						// 車を生成
 						GameObject car = Instantiate (carPrefab) as GameObject;
 						car.transform.position = new Vector3 (posRange * j, car.transform.position.y, i + offsetZ);
+
+						// prefabListにオブジェクトを追加
+						prefabList.Add (car);
 					}
 				}
 			}
@@ -54,6 +77,27 @@ public class ItemGenerator : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		
+
+
+		// 障害物を削除
+		DestroyItems ();
+	}
+
+	void DestroyItems(){
+		// Unityちゃんの位置を取得
+		this.positionZ = this.unitychan.transform.position.z;
+
+		// 全ての障害物
+		for (int i = 0; i < prefabList.Count; i++) {
+			GameObject prefabObject = prefabList [i];
+
+			// Unityちゃんの座標より後ろになると
+			if (prefabObject.transform.position.z < this.positionZ) {
+				// prefabListから削除
+				this.prefabList.Remove (prefabObject);
+				// prefabObjectを削除
+				Destroy (prefabObject);
+			}
+		}
 	}
 }
