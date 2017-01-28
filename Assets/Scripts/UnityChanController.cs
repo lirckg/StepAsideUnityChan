@@ -16,6 +16,11 @@ public class UnityChanController : MonoBehaviour {
 	private float upForce = 500.0f;
 	// 左右の移動できる範囲
 	private float movableRange = 3.4f;
+	// 動きを減速させる係数
+	private float coefficent = 0.95f;
+
+	// ゲーム終了の判定
+	private bool isEnd = false;
 
 	// Use this for initialization
 	void Start () {
@@ -31,6 +36,14 @@ public class UnityChanController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+
+		// ゲーム終了ならUnityちゃんの動きを減速する
+		if (this.isEnd) {
+			this.forwardForce *= this.coefficent;
+			this.turnForce *= this.coefficent;
+			this.upForce *= this.coefficent;
+			this.myAnimator.speed *= this.coefficent;
+		}			
 
 		// Unityちゃんに前方向の力を加える
 		this.myRigidbody.AddForce (this.transform.forward * this.forwardForce);
@@ -54,6 +67,29 @@ public class UnityChanController : MonoBehaviour {
 			this.myAnimator.SetBool ("Jump", true);
 			// Unityちゃんに上方向の力を加える
 			this.myRigidbody.AddForce (this.transform.up * this.upForce);
+		}
+	}
+
+	// トリガーモードで他のオブジェクトと接触した場合の処理
+	void OnTriggerEnter(Collider other){
+		// 障害物に衝突いた場合
+		if (other.gameObject.tag == "CarTag" || other.gameObject.tag == "TrafficConeTag") {
+			this.isEnd = true;
+		}
+
+		// ゴール地点に到達した場合
+		if (other.gameObject.tag == "GoalTag") {
+			this.isEnd = true;
+		}
+
+		// コインに衝突した場合
+		if (other.gameObject.tag == "CoinTag") {
+
+			// パーティクル愛生
+			GetComponent<ParticleSystem> ().Play();
+
+			// 接触sたコインオブジェクトを破棄
+			Destroy (other.gameObject);
 		}
 	}
 }
