@@ -102,7 +102,7 @@ public class UnityChanController : MonoBehaviour {
 		if (other.gameObject.tag == "GoalTag") {
 			this.isEnd = true;
 			// stateTextにGAME CLEARを表示
-			this.stateText.GetComponent<Text> ().text = "CLEAR!";
+			this.stateText.GetComponent<Text> ().text = "CLEAR!!";
 		}
 
 		// コインに衝突した場合
